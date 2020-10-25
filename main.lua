@@ -1,7 +1,6 @@
 message = 5
 chicken = "10"
 output = chicken * 3
-message = "no"
 
 
 message = message - 2
