@@ -62,6 +62,6 @@ end
 -- will use distance formula to calculate distance from circle
 -- aka calculate distance between 2 points
 function distanceBetween(x1, y1, x2, y2)
-   return math.sqrt((x1 - x2)^2 + (y2 - y1)^2)
+   return math.sqrt((x2 - x1)^2 + (y2 - y1)^2)
 end
 
