@@ -1,27 +1,13 @@
 message = 0
-condition = -25
+test = 0
 
-
---[[
-if condition > 0 then
-    message = 1
-else
-    message = -1
-end--]]
-
--- else if 
-if condition > 0 then
-    message = 1
-elseif condition < -100 then
-    message = -1
-elseif condition == -25 then
-    message = "hello!"
-else
-    message = "No conditions met!"
+while message < 100 do 
+    message  =  message + 1
+    test = test - 5
 end
 
 
 function love.draw()
     love.graphics.setFont(love.graphics.newFont(50))
-    love.graphics.print(message)
+    love.graphics.print(test)
 end
