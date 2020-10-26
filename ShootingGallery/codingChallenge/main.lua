@@ -83,7 +83,10 @@ function love.draw()
 
     -- print message to end user to click to begin
     if gameState == 1 then
-        love.graphics.printf("Click to begin!", 0, 250, love.graphics.getWidth(), "center")
+        love.graphics.printf("Click to begin!", 0, 180, love.graphics.getWidth(), "center")
+        love.graphics.printf("Left Click for 1 point", 0, 230, love.graphics.getWidth(), "center")
+        love.graphics.printf("Right Click for 2 points, but lose time!", 0, 280, love.graphics.getWidth(), "center")
+        love.graphics.printf("Careful, if you miss you lose a point!", 0, 330, love.graphics.getWidth(), "center")
     end
     -- Target not visible as gameState at 2
     if gameState == 2 then
@@ -97,30 +100,25 @@ end
      x and y represent mouse current position when pressed,
      button tells which button on mouse was clicked
  --]]
-function love.mousepressed( x, y, button, istouch, presses )
-    -- 1 represents left mouse click
-    if button == 1 and gameState == 2 then
+ function love.mousepressed( x, y, button, istouch, presses )
+    if gameState == 2 then
         local mouseToTarget = distanceBetween(x, y, target.x, target.y)
         if mouseToTarget < target.radius then
-            score = score + 1
-
-            --[[ if score increases, we know to change position of target
-            target.x = 500
-            target.y = 400 --]]
-
-            -- .getWidth gets width of game window in pixels
-            -- we can use target.radius to make sure there is space between circle and edge of screen
+            if button == 1 then
+            	score = score + 1
+            elseif button == 2 then
+            	score = score + 2
+            	timer = timer - 1
+            end
             target.x = math.random(target.radius, love.graphics.getWidth() - target.radius)
             target.y = math.random(target.radius, love.graphics.getHeight() - target.radius)
+        elseif score > 0 then
+        	score = score - 1
         end
-    -- when mouse pressed, if at main menu then continue on to gameplay
-    else if button  == 1 and gameState == 1 then
+    elseif button == 1 and gameState == 1 then
         gameState = 2
         timer = 10
-
-        -- score gets reset once game restarts
         score = 0
-    end
     end
 end
 
