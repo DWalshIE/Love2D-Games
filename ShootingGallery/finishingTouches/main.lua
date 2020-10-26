@@ -74,17 +74,13 @@ function love.draw()
     love.graphics.setFont(gameFont)
 
     -- places value of score in top left hand corner
-    love.graphics.print("Score: ".. score, 5, 5)
+    love.graphics.print(score, 0, 0)
 
     -- printing our timer
     -- ceiling rounds number up to next int
     -- floor rounds number down to next int
-    love.graphics.print("Time left: " .. math.ceil(timer), 300, 5)
+    love.graphics.print(math.ceil(timer), 300, 0)
 
-    -- print message to end user to click to begin
-    if gameState == 1 then
-        love.graphics.printf("Click to begin!", 0, 250, love.graphics.getWidth(), "center")
-    end
     -- Target not visible as gameState at 2
     if gameState == 2 then
         -- making crosshair follow mouse perfectly
