@@ -1,4 +1,5 @@
 function love.load()
+    love.window.setTitle("Shooting Gallery")
     target = {} 
     target.x = 300 -- target positions
     target.y = 300
