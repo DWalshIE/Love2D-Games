@@ -10,6 +10,7 @@ function love.load()
 
     -- making a platform for the player to landon
     platform = world:newRectangleCollider(250, 400, 300, 100)
+    test = 1
 
     -- static means it will not move
     platform:setType('static')
