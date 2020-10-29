@@ -82,7 +82,7 @@ function love.keypressed(key)
     if key == 'up' then
         local colliders = world:queryRectangleArea(player:getX() - 20, player:getY() + 50, 40, 2, {'Platform'})
 
-        -- only allow player to jump if there is at least 1 collider
+        -- only allow player to jump if there is at least 1 colliderr
         if #colliders > 0 then
             player:applyLinearImpulse(0, -4000) -- will make object jump
         end
