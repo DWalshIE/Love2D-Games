@@ -8,9 +8,17 @@ function love.load()
     -- creates a camera object, store to var
     cam = cameraFile()
 
+    sounds = {}
+    sounds.jump = love.audio.newSource("audio/jump.wav","static")
+    sounds.music = love.audio.newSource("audio/music.mp3","stream")
+    sounds.music:setLooping(true)
+    sounds.music:setVolume(0.5)
+    sounds.music:play()
+
     sprites = {}
     sprites.playerSheet= love.graphics.newImage('sprites/playerSheet.png')
     sprites.enemySheet= love.graphics.newImage('sprites/enemySheet.png')
+    sprites.background = love.graphics.newImage('sprites/background.png')
 
     local grid = anim8.newGrid(614, 564, sprites.playerSheet:getWidth(), sprites.playerSheet:getHeight())
     local enemyGrid = anim8.newGrid(100,79,sprites.enemySheet:getWidth(), sprites.enemySheet:getHeight())
@@ -24,7 +32,7 @@ function love.load()
     wf = require 'libraries/windfield/windfield'
 
     -- params represent gravity for the physics world, x and y
-    world = wf.newWorld(0, 400, false)
+    world = wf.newWorld(0, 800, false)
 
     world:setQueryDebugDrawing(true)
 
@@ -39,15 +47,27 @@ function love.load()
 
     require('player')
     require('enemy')
+    require('libraries/show')
 
     test = 1
-    --[[
-    dangerZone = world:newRectangleCollider(0, 550, 800, 50, {collision_class = "Danger"})
-    dangerZone:setType('static')--]]
+  
+    dangerZone = world:newRectangleCollider(-500, 800, 5000, 50, {collision_class = "Danger"})
+    dangerZone:setType('static')
 
     platforms = {}
 
-    loadMap()
+    flagX = 0
+    flagY = 0
+    
+    saveData = {}
+    saveData.currentLevel = "level1"
+
+    if love.filesystem.getInfo("data.lua") then
+        local data = love.filesystem.load("data.lua")
+        data()
+    end
+
+    loadMap(saveData.currentLevel)
 
 end
 
@@ -61,13 +81,23 @@ function love.update(dt)
     -- makes camera look at specific point in game
     local px, py = player:getPosition()
     cam:lookAt(px, love.graphics.getHeight() / 2)
+
+      local colliders = world:queryCircleArea(flagX, flagY, 10, {'Player'})
+      if #colliders > 0 then
+        if saveData.currentLevel == "level1" then
+            loadMap("level2")
+        elseif saveData.currentLevel == "level2" then
+            loadMap("level1")
+        end
+      end
 end
 
 function love.draw()
+    love.graphics.draw(sprites.background, 0, 0)
     -- everything after this will be drawn to screen from cam viewpoint
     cam:attach()
         gameMap:drawLayer(gameMap.layers["Tile Layer 1"])
-        world:draw()
+        --world:draw()
         drawPlayer()
         drawEnemies()
     cam:detach()
@@ -79,7 +109,11 @@ function love.keypressed(key)
         -- only allow player to jump if there is at least 1 colliderr
         if player.grounded then
             player:applyLinearImpulse(0, -4000) -- will make object jump
+            sounds.jump:play()
         end
+    end
+    if key == 'r' then 
+        loadMap("level2")
     end
 end
 
@@ -93,19 +127,54 @@ function love.mousepressed(x, y, button)
 end
 
 function spawnPlatform(x, y, width, height)
-    -- making a platform for the player to landon
-    local  platform = world:newRectangleCollider(x, y, width, height, {collision_class = "Platform"})
-    -- static means it will not move
+    local platform = world:newRectangleCollider(x, y, width, height, {collision_class = "Platform"})
     platform:setType('static')
     table.insert(platforms, platform)
 end
 
-function loadMap()
-    gameMap = sti("maps/level1.lua")
-    for i,obj in pairs(gameMap.layers["Platforms"].objects) do
+function destroyAll()
+    local i = #platforms
+    while i > -1 do
+        if platforms[i] ~= nil then
+            platforms[i]:destroy()
+        end
+        table.remove(platforms, i)
+        i = i - 1
+    end
+
+    local i = #enemies
+    while i > -1 do
+        if enemies[i] ~= nil then
+            enemies[i]:destroy()
+        end
+        table.remove(enemies, i)
+        i = i - 1
+    end
+end
+function loadMap(mapName)
+    saveData.currentLevel = mapName
+    love.filesystem.write("data.lua", table.show(saveData, "saveData"))
+    destroyAll()
+    player:setPosition(playerStartX, playerStartY)
+   -- player:setPosition(300, 100)
+    gameMap = sti("maps/" .. mapName .. ".lua")
+
+    for i, obj in pairs(gameMap.layers["Start"].objects) do
+        playerStartX = obj.x
+        playerStartY = obj.y
+    end
+    player:setPosition(playerStartX, playerStartY)
+
+    for i, obj in pairs(gameMap.layers["Platforms"].objects) do
         spawnPlatform(obj.x, obj.y, obj.width, obj.height)
     end
-    for i,obj in pairs(gameMap.layers["Enemies"].objects) do
+    
+    for i, obj in pairs(gameMap.layers["Enemies"].objects) do
         spawnEnemy(obj.x, obj.y)
+    end
+    
+    for i, obj in pairs(gameMap.layers["Flag"].objects) do
+        flagX = obj.x
+        flagY = obj.y
     end
 end
