@@ -53,8 +53,8 @@ function love.update(dt)
 end
 
 function love.draw()
-    world:draw()
     gameMap:drawLayer(gameMap.layers["Tile Layer 1"])
+    world:draw()
     drawPlayer()
 end
 
